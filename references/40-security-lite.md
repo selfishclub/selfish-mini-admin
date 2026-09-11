@@ -2,7 +2,7 @@
 
 1. **열쇠는 서버에만.** `SUPABASE_SERVICE_ROLE_KEY` 는 `src/lib/supabase.ts` 에서만 읽는다. `NEXT_PUBLIC_` 으로 시작하는 변수에 관리자 키를 넣지 않는다. "use client" 파일이 supabase.ts 를 import 하지 않는다.
 2. **표는 만들자마자 잠근다.** 표 생성 SQL 과 같은 파일에서 RLS 를 켜고 anon·authenticated 권한을 회수한다. 정책은 만들지 않는다.
-3. **어드민과 편집 API 는 비밀번호 뒤에.** `/admin/*` 페이지는 세션 쿠키 확인, `/api/admin/*` 는 첫 줄 `requireAdmin`. 비밀번호 값은 환경변수에만, 비교는 서버에서.
+3. **어드민과 편집 API 는 비밀번호 뒤에.** `/admin/*` 페이지는 세션 쿠키 확인, `/api/admin/*` 는 첫 줄 `requireAdmin`. 비밀번호 값은 환경변수에만, 비교는 서버에서. 참고 구현의 비교는 길이가 다르면 바로 false 를 돌려 비밀번호 길이가 새지만, 12자 이상 랜덤이면 워크숍 수준에서는 문제 되지 않는다.
 4. **들어오는 값은 길이를 자른다.** 문의 폼은 이름 40자·연락처 80자·내용 2000자, 허니팟 칸, 1분 5회 제한.
 5. **.env* 와 .claude/settings.local.json 은 .gitignore 에.** 커밋 전 `git diff --cached` 로 키가 없는지 본다. 이미 올라간 키는 지우지 말고 "재발급 필요"라고 먼저 알린다.
 6. **삭제 기능은 없다.** 문의는 상태만 바꾸고, 항목은 값만 바꾼다.

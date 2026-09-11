@@ -4,7 +4,7 @@
 
 | # | 항목 | 보는 곳 | 결과 예 |
 |---|---|---|---|
-| 1 | 프레임워크 | package.json dependencies (next / vite / astro / 정적 html) | Next.js 16 (App Router) |
+| 1 | 프레임워크 | package.json dependencies (next / vite / astro / 정적 html) | Next.js 16 (App Router) — 16+ 는 proxy.ts, 15 이하는 middleware.ts |
 | 2 | 배포 | .vercel/, vercel.json, README 의 주소 | Vercel, https://… |
 | 3 | 저장소 | .git 과 origin | GitHub 연결됨 / 안 됨 |
 | 4 | DB 유무 | @supabase/supabase-js, supabase/ 폴더, SUPABASE_URL 같은 변수 이름, firebase.json | 없음 → 3단계에서 Supabase 를 붙인다 |

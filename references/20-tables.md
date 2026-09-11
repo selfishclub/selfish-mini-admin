@@ -3,6 +3,7 @@
 어드민은 냉장고 문이다. 어드민으로 바꾸려면 그 내용이 DB에 있어야 한다. 코드에 글자로 박혀 있으면 못 바꾼다.
 
 ## 표 두 개 (필요한 것만)
+접두사를 쓰기로 했으면 아래 표 이름 앞에 붙인다.
 ```sql
 -- supabase/migrations/20260911000001_site_content.sql
 create table if not exists public.site_content (
@@ -48,6 +49,7 @@ on conflict (key) do nothing;
 ## DB 가 없을 때 — AI가 브라우저로 직접 하는 순서
 사용자가 Supabase·Vercel 에 로그인돼 있어야 한다. 가입·결제·플랜 변경은 하지 않는다.
 1. supabase.com/dashboard → New project → 이름은 사이트 이름, 리전 Northeast Asia (Seoul), DB 비밀번호는 "Generate" 버튼으로 생성하고 **복사하거나 출력하지 않는다** → Create.
+   **한도에 걸리면** (New project 에서 'exceeded their free project limits … Limit: 2 free projects' 가 뜨면): 삭제·일시정지·업그레이드는 AI 가 하지 않는다. 사용자에게 AskUserQuestion 한 번으로 묻는다 — (a) 기존 프로젝트 중 하나를 이 사이트용으로 같이 쓴다(추천. 표 이름에 접두사 `사이트약칭_` 을 붙여 `사이트약칭_site_content`, `사이트약칭_inquiries` 로 만들고, 코드의 표 이름 상수도 같은 접두사로) (b) 사용자가 직접 기존 프로젝트를 일시정지·삭제하거나 업그레이드한 뒤 다시 부른다. (a) 를 고르면 3단계 Vercel 연동은 그 기존 프로젝트의 Integrations → Vercel 에서 한다.
 2. 프로젝트가 켜질 때까지 기다린다(1~2분).
 3. Vercel 연동: Supabase 대시보드 → 프로젝트 → Integrations → Vercel → Add new project connection → 사이트의 Vercel 프로젝트 선택 → Production 체크 → Connect. 이러면 `SUPABASE_URL`, `SUPABASE_SERVICE_ROLE_KEY` 등이 Vercel 환경변수로 자동 들어간다. 키를 사람이 옮기지 않는다.
    (Vercel 쪽에서 하려면: Vercel 프로젝트 → Storage → Connect Database → Supabase 가 목록에 있을 때만.)

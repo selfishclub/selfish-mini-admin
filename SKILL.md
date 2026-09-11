@@ -2,7 +2,7 @@
 name: selfish-mini-admin
 description: 워크숍에서 만든 내 사이트(자기소개·문의, 포트폴리오, 신청·예약, 진단·계산기, 팀 안내, 투두)에 비밀번호 하나짜리 관리자 페이지(/admin)를 붙여 주는 스킬. "내가 아닌 사람이, 나 없이, 자주 바꿔야 하는 것"을 AI가 코드에서 찾아 제안하고, 고른 것을 DB(Supabase)로 옮긴 뒤 어드민에서 글자·목록·켜고 끄기·문의 접수함을 바꿀 수 있게 만든다. DB가 없으면 Supabase 를 붙여 준다. 사용자가 "어드민 만들어 줘", "관리자 페이지", "내용을 사이트에서 바로 고치고 싶어", "문의 들어온 거 보고 싶어", "다른 사람도 고칠 수 있게", "냉장고 문 만들어 줘", "설계도 v3로 어드민" 같은 말을 하면 반드시 이 스킬을 사용한다. UTM·GA·대시보드·회원 로그인·디자인 변경 요청에는 사용하지 않는다.
 license: CC-BY-4.0
-version: 0.1.0
+version: 0.1.1
 ---
 
 # selfish-mini-admin — 냉장고 문 달기
@@ -31,7 +31,7 @@ version: 0.1.0
 | 4 내용 옮기기 | 고른 항목을 seed 로 넣고, 사이트가 `getContent(key, 원래값)` 으로 읽게 고친다. 폼은 `/api/inquiries` 로 | `references/30-impl-admin.md` |
 | 5 어드민 | `/admin/login`, `/admin`(항목별 편집), `/admin/inquiries` | `references/30-impl-admin.md`, `references/40-security-lite.md` |
 | 6 확인 | 배포 후 어드민에서 글자 하나 바꾸고 사이트 새로고침 → 스크린샷. 테스트 문의 1건 → 접수함 | — |
-| 7 정리 | 인수인계 + 자체 점검 5줄 + 오늘 막힌 것 | `references/50-handoff.md`, `references/40-security-lite.md` |
+| 7 정리 | 인수인계(`docs/HANDOFF.md`) + 자체 점검 5줄 + 오늘 막힌 것 | `references/50-handoff.md`, `references/40-security-lite.md` |
 
 ## 단계마다 보고한다
 무엇을 했고, 무엇을 확인했고, 무엇을 확인 못 했는지. 확인 못 한 것은 못 했다고 쓴다. 테스트로 넣은 데이터는 목록으로 보고하고 지우지 않는다.
