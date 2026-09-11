@@ -104,6 +104,45 @@ export function requireAdmin(req: Request): NextResponse | null {
 export const ADMIN_COOKIE = COOKIE;
 ```
 
+## src/lib/rate-limit.ts — 인메모리 속도 제한
+```ts
+/**
+ * 아주 단순한 인메모리 rate limit.
+ * Vercel 서버리스에서는 인스턴스별로 동작하므로 "완벽한" 방어가 아니라
+ * 실수·단순 봇을 막는 1차 안전장치다. 트래픽이 커지면 Upstash 등으로 교체.
+ */
+type Bucket = { count: number; resetAt: number };
+const buckets = new Map<string, Bucket>();
+
+export function rateLimit(
+  key: string,
+  { limit = 5, windowMs = 60_000 }: { limit?: number; windowMs?: number } = {},
+): { ok: boolean; retryAfterSec: number } {
+  const now = Date.now();
+  const b = buckets.get(key);
+  if (!b || b.resetAt <= now) {
+    buckets.set(key, { count: 1, resetAt: now + windowMs });
+    return { ok: true, retryAfterSec: 0 };
+  }
+  b.count += 1;
+  if (b.count > limit) {
+    return { ok: false, retryAfterSec: Math.ceil((b.resetAt - now) / 1000) };
+  }
+  return { ok: true, retryAfterSec: 0 };
+}
+
+// 메모리 누수 방지: 가끔 만료된 버킷 정리
+if (typeof setInterval === "function") {
+  const t = setInterval(() => {
+    const now = Date.now();
+    for (const [k, b] of buckets) if (b.resetAt <= now) buckets.delete(k);
+  }, 5 * 60_000);
+  // Node에서 프로세스 종료를 막지 않도록
+  (t as { unref?: () => void }).unref?.();
+}
+```
+`admin-login`(`src/app/api/admin/login/route.ts`)과 `inquiry`(`src/app/api/inquiries/route.ts`) 두 라우트가 이 구현을 공유한다. 키 prefix만 다르게 줘서 버킷이 섞이지 않게 한다.
+
 ## src/app/api/admin/login/route.ts
 ```ts
 import { NextResponse } from "next/server";
@@ -198,7 +237,7 @@ export async function PATCH(req: Request) {
   const body = await req.json().catch(() => null);
   const key = typeof body?.key === "string" ? body.key.slice(0, 64) : "";
   if (!key) return NextResponse.json({ error: "key" }, { status: 422 });
-  const { data: row } = await db().from("site_content").select("type").eq("key", key).maybeSingle<{ type: string }>();
+  const { data: row } = await db().from("site_content").select("type").eq("key", key).maybeSingle<{ type: "text" | "longtext" | "list" | "toggle" }>();
   if (!row) return NextResponse.json({ error: "unknown_key" }, { status: 404 });
   let value: unknown = body.value;
   if (row.type === "text" || row.type === "longtext") {
@@ -282,12 +321,12 @@ function ListEditor({ value, onChange }: { value: unknown[]; onChange: (v: unkno
 ```ts
 import { NextResponse } from "next/server";
 import { db, hasSupabaseEnv } from "@/lib/supabase";
+import { rateLimit } from "@/lib/rate-limit";
 export const runtime = "nodejs";
-const buckets = new Map<string, { n: number; t: number }>();
-function limited(ip: string) { const now = Date.now(); const b = buckets.get(ip); if (!b || b.t < now) { buckets.set(ip, { n: 1, t: now + 60_000 }); return false; } b.n++; return b.n > 5; }
 export async function POST(req: Request) {
   const ip = req.headers.get("x-forwarded-for")?.split(",")[0]?.trim() ?? "unknown";
-  if (limited(ip)) return NextResponse.json({ error: "too_many" }, { status: 429 });
+  const rl = rateLimit(`inquiry:${ip}`, { limit: 5, windowMs: 60_000 });
+  if (!rl.ok) return NextResponse.json({ error: "too_many" }, { status: 429 });
   const body = await req.json().catch(() => ({}));
   if (typeof body.website === "string" && body.website) return NextResponse.json({ ok: true }); // 허니팟: 봇만 채우는 숨은 칸
   const name = String(body.name ?? "").trim().slice(0, 40), contact = String(body.contact ?? "").trim().slice(0, 80), message = String(body.message ?? "").trim().slice(0, 2000);
