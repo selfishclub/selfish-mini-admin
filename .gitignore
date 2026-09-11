@@ -1,0 +1,7 @@
+.DS_Store
+.env*
+.claude/settings.local.json
+.vercel
+node_modules
+.superpowers
+*.skill
